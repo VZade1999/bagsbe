@@ -4,7 +4,7 @@ const cors = require("cors");
 const router = require("./routes/routes");
 
 const corsOptions = {
-  origin: "http://localhost:3000", // Corrected URL without the closing parenthesis
+  origin: "https://hotelmidasreegency.com"||"http://localhost:3000", // Corrected URL without the closing parenthesis
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
