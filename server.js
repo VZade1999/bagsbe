@@ -3,7 +3,9 @@ const app = express();
 const cors = require("cors");
 const router = require("./routes/routes");
 
+
 const corsOptions = {
+  // origin: "http://localhost:3000",
   origin: "https://hotelmidasreegency.com", // Corrected URL without the closing parenthesis
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
