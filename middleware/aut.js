@@ -1,4 +1,4 @@
-const secret_key = 'd5791705cb7deda06bf36b4abd9f5e76209fd7fa2ff8946606b0e2f61432c050d35c8ebda460ffa03d86efaa7b53d021fd67c71f9307613e2c3bae0dc5ec72e7';
+const secret_key = process.env.SECRET_KEY
 const jwt = require("jsonwebtoken");
 exports.validateAuth = async (req, res, next) => {
   if (

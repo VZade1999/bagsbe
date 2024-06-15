@@ -1,8 +1,6 @@
 const db = require("../model/index");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const secret = crypto.randomBytes(64).toString("hex");
 const secret_key = process.env.SECRET_KEY;
 const axios = require("axios");
 
