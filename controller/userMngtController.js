@@ -6,12 +6,12 @@ async function registerUser(req, res) {
     if (registerResult.code == "11000") {
       res.status(200);
       res.json({
-        message: "This What's App number is already registered",
+        message: "This Email address is already registered",
         registerResult,
       });
     }
     res.status(200);
-    res.json(registerResult );
+    res.json(registerResult);
   } catch (error) {
     console.log(error);
     res.status(500);
@@ -24,9 +24,9 @@ async function registerUser(req, res) {
 
 async function generateOtp(req, res) {
   try {
-    const loginResult = await userMngtService.generateOtp(req.body);
+    const otpResponse = await userMngtService.generateOtp(req.body);
     res.status(200);
-    res.json({ message: "OTP Response", loginResult });
+    res.json(otpResponse);
   } catch (error) {
     res.status(404);
     res.json(error);
@@ -69,5 +69,5 @@ module.exports = {
   generateOtp,
   validationUser,
   loginUser,
-  validation
+  validation,
 };
