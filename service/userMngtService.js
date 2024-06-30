@@ -9,8 +9,7 @@ const sendEmail = require("./mailer");
 const { validate } = require("../model/user");
 
 const register = async (jsonBody) => {
-  const { name, email, password, otp } = jsonBody;
-  const storedOtpData = otpStore[email];
+  const { name, email, password } = jsonBody;
   const salt = await bcrypt.genSalt(10);
   const pass = await bcrypt.hash(password, salt);
   const userDate = {
@@ -23,26 +22,14 @@ const register = async (jsonBody) => {
   };
 
   try {
-    if (!storedOtpData) {
-      return { valid: false, message: "OTP not found" };
-    }
-    const { otp: storedOtp, expires } = storedOtpData;
-    if (Date.now() > expires) {
-      delete otpStore[email];
-      return { valid: false, message: "OTP has expired" };
-    }
-    if (storedOtp !== otp) {
-      return { valid: false, message: "Invalid OTP" };
-    }
-
-    delete otpStore[email];
     const checking = db.user(userDate);
     const user = await checking.save();
-    const result = { valid: true, message: "OTP confirmed" };
-    return result;
+    return {
+      valid: true,
+      message: "User Registered Successfully",
+    };
   } catch (error) {
-    console.log('err2',error.errorResponse);
-    return error.errorResponse;
+    return error;
   }
 };
 
@@ -58,14 +45,14 @@ const generateOtp = async (jsonBody) => {
     }
     const otp = generateAndStoreOTP(email);
     const templatePath = path.join(__dirname, "./verificationCode.html");
-    const template = fs.readFileSync(templatePath, 'utf8');
+    const template = fs.readFileSync(templatePath, "utf8");
     const renderTemplate = (template, variables) => {
-      return template.replace(/{{(\w+)}}/g, (_, key) => variables[key] || '');
+      return template.replace(/{{(\w+)}}/g, (_, key) => variables[key] || "");
     };
-    
+
     const emailSubject = "Verification code";
     const templateVariables = { otp: otp };
-    const mainData = renderTemplate(template,templateVariables)
+    const mainData = renderTemplate(template, templateVariables);
     try {
       const res = await sendEmail(email, emailSubject, mainData);
       return {
@@ -83,6 +70,36 @@ const generateOtp = async (jsonBody) => {
       valid: false,
       message: "Internal Server Error",
     };
+  }
+};
+
+const validateOtp = async (jsonBody) => {
+  const { email, otp } = jsonBody;
+  const storedOtpData = otpStore[email];
+  try {
+    if (!storedOtpData) {
+      return { valid: false, message: "OTP not found" };
+    }
+    const { otp: storedOtp, expires } = storedOtpData;
+    console.log("hit", storedOtp, expires);
+    if (Date.now() > expires) {
+      delete otpStore[email];
+      return { valid: false, message: "OTP has expired" };
+    }
+    if (storedOtp !== otp) {
+      return {
+        valid: false,
+        message: "Invalid OTP",
+      };
+    }
+    delete otpStore[email];
+    return {
+      valid: true,
+      message: "OTP validated Successfully",
+    };
+  } catch (error) {
+    console.log("err2", error.errorResponse);
+    return error.errorResponse;
   }
 };
 
@@ -127,4 +144,5 @@ module.exports = {
   register,
   generateOtp,
   login,
+  validateOtp,
 };

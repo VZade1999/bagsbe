@@ -32,22 +32,13 @@ async function generateOtp(req, res) {
     res.json(error);
   }
 }
-async function validation(req, res) {
-  try {
-    res.status(200);
-    res.json({ isValid: true });
-  } catch (error) {
-    res.status(404);
-    res.json({ isValid: false });
-  }
-}
 
-async function validationUser(req, res) {
+async function validateOtp(req, res){
   try {
-    const loginResult = await userMngtService.validation(req.body);
+    const validationResponse = await userMngtService.validateOtp(req.body);
     res.status(200);
-    res.json({ message: "User Logged Successfully", loginResult });
-  } catch (error) {
+    res.json(validationResponse);
+  }catch(error){
     res.status(404);
     res.json(error);
   }
@@ -67,7 +58,6 @@ async function loginUser(req, res) {
 module.exports = {
   registerUser,
   generateOtp,
-  validationUser,
   loginUser,
-  validation,
+  validateOtp,
 };

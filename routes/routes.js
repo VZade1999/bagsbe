@@ -9,6 +9,8 @@ router.post("/register", userMngtController.registerUser);
 
 router.post('/generateotp', userMngtController.generateOtp );
 
+router.post('/validateotp', userMngtController.validateOtp );
+
 router.post("/login", userMngtController.loginUser);
 
 router.post("/roomcheck", roomBookingController.roomCheck);
