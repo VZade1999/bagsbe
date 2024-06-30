@@ -14,7 +14,7 @@ const roomBooking = async (jsonBody) => {
     const payment_capture = 1;
     const currency = "INR";
     const options = {
-      amount: total * 100, 
+      amount: total * 100,
       currency,
       receipt: "receipt1",
       payment_capture,
@@ -31,12 +31,12 @@ const roomCheck = async (jsonBody) => {
   const { startDate, endDate } = jsonBody;
   console.log(jsonBody);
   try {
-   const roomData =  [
+    const roomData = [
       {
         roomId: 1,
         roomType: "Non-AC Room",
         discription: "Best for Couple, 2 Adules",
-        price: 999,
+        price: 1199,
         rating: 4.5,
         isAvailable: true,
       },
@@ -44,7 +44,7 @@ const roomCheck = async (jsonBody) => {
         roomId: 2,
         roomType: "AC Room",
         discription: "Best for Couple, 2 Adules",
-        price: 1299,
+        price: 1499,
         rating: 4.8,
         isAvailable: false,
       },
@@ -52,7 +52,7 @@ const roomCheck = async (jsonBody) => {
         roomId: 3,
         roomType: "Non-AC Room",
         discription: "Best for Family, 2 Adules",
-        price: 1099,
+        price: 1299,
         rating: 5.0,
         isAvailable: true,
       },
@@ -60,7 +60,7 @@ const roomCheck = async (jsonBody) => {
         roomId: 4,
         roomType: "AC Room",
         discription: "Best for Family, 2 Adules",
-        price: 250,
+        price: 1599,
         rating: 5.0,
         isAvailable: true,
       },
@@ -68,15 +68,15 @@ const roomCheck = async (jsonBody) => {
         roomId: 5,
         roomType: "Non-AC Room",
         discription: "Best For Carporate, 2 Adules",
-        price: 250,
+        price: 1399,
         rating: 5.0,
         isAvailable: true,
       },
       {
         roomId: 6,
         roomType: "AC Room",
-        discription: "Best For Carporate, 2 Adules",
-        price: 250,
+        discription: "Best For Corporate, 2 Adules",
+        price: 1699,
         rating: 5.0,
         isAvailable: true,
       },
@@ -84,7 +84,7 @@ const roomCheck = async (jsonBody) => {
         roomId: 7,
         roomType: "Non-AC Room",
         discription: "Best For Singles, 2 Adules",
-        price: 799,
+        price: 999,
         rating: 5.0,
         isAvailable: true,
       },
@@ -92,7 +92,7 @@ const roomCheck = async (jsonBody) => {
         roomId: 8,
         roomType: "AC Room",
         discription: "Best For Singles, 2 Adules",
-        price: 879,
+        price: 1299,
         rating: 5.0,
         isAvailable: true,
       },
@@ -104,42 +104,39 @@ const roomCheck = async (jsonBody) => {
         rating: 5.0,
         isAvailable: true,
       },
-      {
-        roomId: 10,
-        roomType: "AC Room",
-        discription: "Pets Friendly, 2 Adules",
-        price: 1999,
-        rating: 5.0,
-        isAvailable: true,
-      },
-      {
-        roomId: 11,
-        roomType: "AC Room",
-        discription: "Pets Friendly, 2 Adules",
-        price: 1999,
-        rating: 5.0,
-        isAvailable: false,
-      },
-      {
-        roomId: 12,
-        roomType: "AC Room",
-        discription: "Pets Friendly, 2 Adules",
-        price: 1999,
-        rating: 5.0,
-        isAvailable: true,
-      },
-    ]
-    console.log(roomData);
+    ];
     return roomData;
   } catch (error) {
     return error;
   }
 };
 
-
 const roombooked = async (jsonBody) => {
-  const { userId, checkInDate, checkOutDate, room, numberOfDays,total, customer, email, address,phone } = jsonBody;
-  console.log('----123',userId, checkInDate, checkOutDate, room, numberOfDays, total, customer, email, address,phone);
+  const {
+    userId,
+    checkInDate,
+    checkOutDate,
+    room,
+    numberOfDays,
+    total,
+    customer,
+    email,
+    address,
+    phone,
+  } = jsonBody;
+  console.log(
+    "----123",
+    userId,
+    checkInDate,
+    checkOutDate,
+    room,
+    numberOfDays,
+    total,
+    customer,
+    email,
+    address,
+    phone
+  );
   try {
     const roomBooked = {
       userId: userId,
@@ -147,16 +144,15 @@ const roombooked = async (jsonBody) => {
       checkOutDate: checkOutDate,
       numberOfDays: numberOfDays,
       amount: total,
-      roomDescription: room.discription ,
+      roomDescription: room.discription,
       roomType: room.roomType,
-      customer:customer,
-      email:email,
-      address:address,
-      phone:phone
-      
+      customer: customer,
+      email: email,
+      address: address,
+      phone: phone,
     };
     const amt = total.toString();
-    const number = phone
+    const number = phone;
     const apiPayload = {
       apiKey:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MzBmZGEyM2VmMTAxMGVhYmFhMTBjMSIsIm5hbWUiOiJIb3RlbCBNaWRhcyBSZWVnZW5jeSIsImFwcE5hbWUiOiJBaVNlbnN5IiwiY2xpZW50SWQiOiI2NDMwZmRhMTNlZjEwMTBlYWJhYTEwYmMiLCJhY3RpdmVQbGFuIjoiQkFTSUNfTU9OVEhMWSIsImlhdCI6MTcwMjc5NjgzOH0.wOfn734COxFy0tApmZIbWxISCqtCUTGnV9aFmrW0wYU",
@@ -170,7 +166,7 @@ const roombooked = async (jsonBody) => {
         room.roomType,
         room.discription,
         amt,
-      ]
+      ],
     };
 
     const response = await axios.post(
@@ -185,7 +181,7 @@ const roombooked = async (jsonBody) => {
     const roomDataSave = db.roomBooking(roomBooked);
     const roomEntry = await roomDataSave.save();
 
-    console.log('------',roomEntry, roomDataSave,response);
+    console.log("------", roomEntry, roomDataSave, response);
     return roomEntry;
   } catch (error) {
     console.log(error);
@@ -196,5 +192,5 @@ const roombooked = async (jsonBody) => {
 module.exports = {
   roomBooking,
   roombooked,
-  roomCheck
+  roomCheck,
 };
