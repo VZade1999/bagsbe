@@ -81,7 +81,6 @@ const validateOtp = async (jsonBody) => {
       return { valid: false, message: "OTP not found" };
     }
     const { otp: storedOtp, expires } = storedOtpData;
-    console.log("hit", storedOtp, expires);
     if (Date.now() > expires) {
       delete otpStore[email];
       return { valid: false, message: "OTP has expired" };
@@ -98,7 +97,6 @@ const validateOtp = async (jsonBody) => {
       message: "OTP validated Successfully",
     };
   } catch (error) {
-    console.log("err2", error.errorResponse);
     return error.errorResponse;
   }
 };
@@ -107,7 +105,6 @@ const login = async (jsonBody) => {
   const { email, password } = jsonBody;
   try {
     const user = await db.user.findOne({ email });
-    console.log(user);
     if (!user) {
       return { message: "User not found", status: false };
     }

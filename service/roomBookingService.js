@@ -1,6 +1,9 @@
 const db = require("../model/index");
 const Razorpay = require("razorpay");
 const axios = require("axios");
+const path = require("path");
+const fs = require("node:fs");
+const sendEmail = require("./mailer");
 
 const razorpay = new Razorpay({
   key_id: "rzp_live_miuq50dflMActu",
@@ -9,7 +12,6 @@ const razorpay = new Razorpay({
 
 const roomBooking = async (jsonBody) => {
   const { userId, checkInDate, checkOutDate, room, total } = jsonBody;
-  console.log(jsonBody);
   try {
     const payment_capture = 1;
     const currency = "INR";
@@ -20,7 +22,6 @@ const roomBooking = async (jsonBody) => {
       payment_capture,
     };
     const response = await razorpay.orders.create(options);
-    console.log(response);
     return response;
   } catch (error) {
     return error;
@@ -29,7 +30,6 @@ const roomBooking = async (jsonBody) => {
 
 const roomCheck = async (jsonBody) => {
   const { startDate, endDate } = jsonBody;
-  console.log(jsonBody);
   try {
     const roomData = [
       {
@@ -123,20 +123,9 @@ const roombooked = async (jsonBody) => {
     email,
     address,
     phone,
+    onlinepayment,
+    payathotel
   } = jsonBody;
-  console.log(
-    "----123",
-    userId,
-    checkInDate,
-    checkOutDate,
-    room,
-    numberOfDays,
-    total,
-    customer,
-    email,
-    address,
-    phone
-  );
   try {
     const roomBooked = {
       userId: userId,
@@ -151,42 +140,62 @@ const roombooked = async (jsonBody) => {
       address: address,
       phone: phone,
     };
-    const amt = total.toString();
-    const number = phone;
-    const apiPayload = {
-      apiKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MzBmZGEyM2VmMTAxMGVhYmFhMTBjMSIsIm5hbWUiOiJIb3RlbCBNaWRhcyBSZWVnZW5jeSIsImFwcE5hbWUiOiJBaVNlbnN5IiwiY2xpZW50SWQiOiI2NDMwZmRhMTNlZjEwMTBlYWJhYTEwYmMiLCJhY3RpdmVQbGFuIjoiQkFTSUNfTU9OVEhMWSIsImlhdCI6MTcwMjc5NjgzOH0.wOfn734COxFy0tApmZIbWxISCqtCUTGnV9aFmrW0wYU",
-      campaignName: "roomBooked",
-      destination: number,
-      userName: "User", // Provide a default value if userName is not provided
-      templateParams: [
-        customer,
-        checkInDate,
-        checkOutDate,
-        room.roomType,
-        room.discription,
-        amt,
-      ],
-    };
-
-    const response = await axios.post(
-      "https://backend.aisensy.com/campaign/t1/api/v2",
-      apiPayload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
     const roomDataSave = db.roomBooking(roomBooked);
     const roomEntry = await roomDataSave.save();
 
-    console.log("------", roomEntry, roomDataSave, response);
-    return roomEntry;
+    try {
+      const templatePathForRoomBooking = path.join(__dirname, "./roombooked.html");
+      const templateForRoomBooking = fs.readFileSync(templatePathForRoomBooking, "utf8");
+      const templatePathForBoNotify = path.join(__dirname, "./bonotify.html");
+      const templateForBoNotify = fs.readFileSync(templatePathForBoNotify, "utf8");
+
+      const emailSubjectForRoomBooking = "Room Confirmed";
+      const emailSubjectForBoNotify = "Booking From Website";
+      const date = new Date();
+      const currentDate = date.toLocaleString();
+      const templateVariables = {
+        currentDate: currentDate,
+        USER: customer,
+        reservationnumber: roomEntry._id,
+        guestname: customer,
+        checkindate: checkInDate,
+        checkoutdate: checkOutDate,
+        roomtype: room.roomType,
+        numberofdays: numberOfDays,
+        onlinepayment: onlinepayment,
+        payathotel: payathotel,
+        number: phone
+      };
+      const dataForRoomBooking = renderTemplate(templateForRoomBooking, templateVariables);
+      const dataForBoNotify = renderTemplate(templateForBoNotify, templateVariables);
+      try {
+        const responseOfRoomBooked = await sendEmail(email, emailSubjectForRoomBooking, dataForRoomBooking);
+        const responseOfBoNotify = await sendEmail("midasreegency1131@gmail.com", emailSubjectForBoNotify, dataForBoNotify);
+
+        return {
+          valid: true,
+          message: responseOfRoomBooked,
+        };
+      } catch (error) {
+        return {
+          valid: false,
+          message: "Internal Server Error",
+        };
+      }
+    } catch (error) {
+      return {
+        valid: false,
+        message: "Internal Server Error",
+      };
+    }
   } catch (error) {
     console.log(error);
     return error;
   }
+};
+
+const renderTemplate = (template, variables) => {
+  return template.replace(/{{(\w+)}}/g, (_, key) => variables[key] || "");
 };
 
 module.exports = {
