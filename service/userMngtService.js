@@ -5,8 +5,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret_key = process.env.SECRET_KEY;
 const axios = require("axios");
-const sendEmail = require("./mailer");
-const { validate } = require("../model/user");
+// const sendEmail = require("./mailer");
+const { validate } = require("../model/category");
 
 const register = async (jsonBody) => {
   const { name, email, password } = jsonBody;
@@ -25,11 +25,16 @@ const register = async (jsonBody) => {
     const checking = db.user(userDate);
     const user = await checking.save();
     return {
-      valid: true,
+      status: true,
       message: "User Registered Successfully",
     };
   } catch (error) {
-    return error;
+    if (error.code === 11000) {
+      return {
+        status: false,
+        message: "This Email address is already registered",
+      };
+    }
   }
 };
 
@@ -60,6 +65,7 @@ const generateOtp = async (jsonBody) => {
         message: res,
       };
     } catch (error) {
+      console.log(error);
       return {
         valid: false,
         message: "Internal Server Error",

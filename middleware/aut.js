@@ -10,8 +10,7 @@ exports.validateAuth = async (req, res, next) => {
       try {
         jwt.verify(token, secret_key, (err, decoded) => {
           if (err) {
-            console.log(err);
-              return res.status(401).json('Invalid token');
+              return res.status(401).json({ status: false, message: err });
           }
         if (decoded) {
           next();
