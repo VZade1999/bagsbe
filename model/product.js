@@ -1,5 +1,6 @@
 // models/Product.js
 const mongoose = require('mongoose');
+const { type } = require('os');
 
 const ProductSchema = new mongoose.Schema({
   name: {
@@ -9,6 +10,10 @@ const ProductSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true
+  },
+  stock: {
+    type: Number,
+    require: true
   },
   description: {
     type: String,

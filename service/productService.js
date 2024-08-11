@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const db = require("../model/index");
 const Razorpay = require("razorpay");
+const { json } = require("body-parser");
 
 const razorpay = new Razorpay({
   key_id: "rzp_live_miuq50dflMActu",
@@ -46,6 +47,7 @@ const createProduct = async (jsonBody) => {
     const newProduct = new db.product({
       name: jsonBody.name,
       price: jsonBody.price,
+      stock: jsonBody.stock,
       description: jsonBody.description,
       category: jsonBody.category,
       image: null,
@@ -104,6 +106,7 @@ const bagBooking = async (jsonBody) => {
 };
 
 const createOrder = async (jsonBody) => {
+  console.log(jsonBody);
   try {
     const orderData = {
       customerData: {
@@ -119,15 +122,45 @@ const createOrder = async (jsonBody) => {
       cartItems: jsonBody.cartItem.map((item) => ({
         title: item.title,
         price: item.price,
+        description: item.desc,
         quantity: item.quantity,
         totalPrice: item.totalPrice,
       })),
+      subtotal: jsonBody.subtotal,
+      GST: jsonBody.GST,
+      Shipping: jsonBody.shippingCost,
       totalAmount: jsonBody.totalAmount,
       cartQuantity: jsonBody.cartQuantity,
       payment: jsonBody.paymentJson,
     };
+
     const newOrder = new db.order(orderData);
-    const savedOrder = await newOrder.save();
+
+    for (const item of jsonBody.cartItem) {
+      const product = await db.product.findById(item.id);
+
+      if (product.stock >= item.quantity) {
+        product.stock -= item.quantity;
+
+        // Set product as out of stock if stock is zero
+        if (product.stock === 0) {
+          product.isActive = false;
+        }
+
+        await product.save();
+        const savedOrder = await newOrder.save();
+        return { status: true, message: savedOrder };
+      } else {
+        console.log(error);
+        return { status: false, message: `Not enough stock for ${item.title}` };
+      }
+    }
+    try {
+      const savedOrder = await newOrder.save();
+    } catch (error) {
+      console.log(error);
+    }
+
     return { status: true, message: savedOrder };
   } catch (error) {
     console.log(error);
@@ -173,7 +206,51 @@ const myOrderList = async (jsonBody) => {
     const orders = await db.order.find({
       "customerData.useremail": jsonBody.useremail,
     });
-    return { status: true, message: orders[0].cartItems };
+    console.log(orders);
+    return { status: true, message: orders };
+  } catch (error) {
+    console.log(error);
+    return { status: false, message: error };
+  }
+};
+
+const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    const updatedOrder = await db.order.findByIdAndUpdate(
+      jsonBody.orderId,
+      { status: jsonBody.newStatus, updatedAt: Date.now() },
+      { new: true }
+    );
+    return { status: true, message: updatedOrder };
+  } catch (error) {
+    return { status: false, message: error };
+  }
+};
+
+const getOrderStatus = async (orderId) => {
+  try {
+    const order = await db.order.findById(orderId).select("status");
+    return { status: true, message: order };
+  } catch (error) {
+    return { status: false, message: error };
+  }
+};
+
+const UpdateOrder = async (jsonBody) => {
+  try {
+    const order = await db.order.findById(jsonBody.orderId);
+    if (!order) {
+      return { status: false, message: "Order Nor Found" };
+    }
+    order.status = jsonBody.status;
+    order.updatedAt = Date.now();
+    try {
+      const response = await order.save();
+      return { status: true, message: response };
+    } catch (error) {
+      console.log(error);
+      return { status: false, message: error };
+    }
   } catch (error) {
     return { status: false, message: error };
   }
@@ -191,4 +268,7 @@ module.exports = {
   setDeliveryCharges,
   getDeliveryCharges,
   myOrderList,
+  updateOrderStatus,
+  getOrderStatus,
+  UpdateOrder,
 };

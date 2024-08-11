@@ -74,6 +74,7 @@ async function bagBooking(req, res) {
 }
 
 async function createOrder(req, res) {
+  console.log(req.body);
   try {
     const createOrderResponse = await productService.createOrder(req.body);
     res.json(createOrderResponse);
@@ -125,9 +126,7 @@ async function getDeliveryCharges(req, res) {
 
 async function myOrderList(req, res) {
   try {
-    const myOrderListResponse = await productService.myOrderList(
-      req.body
-    );
+    const myOrderListResponse = await productService.myOrderList(req.body);
     res.json(myOrderListResponse);
     res.status(200);
   } catch (error) {
@@ -136,7 +135,16 @@ async function myOrderList(req, res) {
   }
 }
 
-
+async function UpdateOrder(req, res) {
+  try {
+    const UpdateOrderResponse = await productService.UpdateOrder(req.body);
+    res.json(UpdateOrderResponse);
+    res.status(200);
+  } catch (error) {
+    res.json(error);
+    res.status(404);
+  }
+}
 
 module.exports = {
   categoryList,
@@ -149,5 +157,6 @@ module.exports = {
   bagBooking,
   setDeliveryCharges,
   getDeliveryCharges,
-  myOrderList
+  myOrderList,
+  UpdateOrder,
 };

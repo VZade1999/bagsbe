@@ -26,6 +26,8 @@ router.post("/bagbooking", auth.validateAuth, productController.bagBooking);
 
 router.post("/createorder",auth.validateAuth, productController.createOrder);
 
+router.post("/order/update-status",auth.validateAuth, productController.UpdateOrder);
+
 router.get("/orderlist", productController.orderList);
 
 router.post("/myorderlist", auth.validateAuth, productController.myOrderList);
