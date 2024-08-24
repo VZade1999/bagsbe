@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const router = require("./routes/routes");
+const path = require('path');
 
 
 const corsOptions = {
@@ -19,6 +20,10 @@ app.use(cors(corsOptions)); // Use CORS middleware with specified options
 
 app.use(express.json()); // Parse the JSON data and put it into req.body
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use("/", router);
 
 module.exports = app;
+
+

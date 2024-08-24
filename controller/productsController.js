@@ -29,10 +29,21 @@ async function categoryList(req, res) {
 
 async function createProduct(req, res) {
   try {
-    const createProductResponse = await productService.createProduct(req.body);
+    const { name, price, stock, description, category } = req.body;
+    const images = req.files;
+    const imagePaths = images ? images.map((file) => file.path) : [];
+    const createProductResponse = await productService.createProduct({
+      name,
+      price,
+      stock,
+      description,
+      category,
+      images: imagePaths,
+    });
     res.json(createProductResponse);
     res.status(200);
   } catch (error) {
+    console.error("Error in createProduct controller:", error);
     res.json(error);
     res.status(404);
   }
@@ -74,7 +85,6 @@ async function bagBooking(req, res) {
 }
 
 async function createOrder(req, res) {
-  console.log(req.body);
   try {
     const createOrderResponse = await productService.createOrder(req.body);
     res.json(createOrderResponse);

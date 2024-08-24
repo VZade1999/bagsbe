@@ -17,7 +17,6 @@ async function generateOtp(req, res) {
     res.status(200);
     res.json(otpResponse);
   } catch (error) {
-    console.log("error", error);
     res.status(404);
     res.json(error);
   }

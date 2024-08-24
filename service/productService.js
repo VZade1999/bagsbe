@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const db = require("../model/index");
 const Razorpay = require("razorpay");
 const { json } = require("body-parser");
+const path = require("path");
+const fs = require("fs");
 
 const razorpay = new Razorpay({
   key_id: "rzp_live_miuq50dflMActu",
@@ -50,7 +52,7 @@ const createProduct = async (jsonBody) => {
       stock: jsonBody.stock,
       description: jsonBody.description,
       category: jsonBody.category,
-      image: null,
+      images: jsonBody.images || [],
       isActive: true,
       isDeleted: false,
     });
@@ -58,9 +60,11 @@ const createProduct = async (jsonBody) => {
       const savedProduct = await newProduct.save();
       return { status: true, message: savedProduct };
     } catch (error) {
+      console.error("Error saving product:", error);
       return { status: false, message: error };
     }
   } catch (error) {
+    console.error("Unexpected error:", error);
     return { status: false, message: error };
   }
 };
@@ -76,10 +80,52 @@ const productList = async () => {
 
 const deleteProduct = async (jsonBody) => {
   try {
-    const response = await db.product.findByIdAndDelete(jsonBody.id);
-    return { status: true, message: response };
+    // Find the product by ID
+    const product = await db.product.findById(jsonBody.id);
+    console.log("Product details to be deleted:", product);
+
+    if (!product) {
+      return { status: false, message: "Product not found" };
+    }
+
+    // Path to the uploads directory
+    const uploadDir = path.join(__dirname, "uploads");
+
+    // Delete each image file
+    const deletePromises = product.images.map(async (imagePath) => {
+      // Ensure imagePath is relative and does not include any extra directories
+      const normalizedImagePath = imagePath.replace(/^uploads[\/\\]/, "");
+
+      // Construct the full file path
+      const fullPath = path.join(uploadDir, normalizedImagePath);
+      console.log(`Attempting to delete file: ${fullPath}`);
+
+      try {
+        // Check if file exists before attempting to delete
+        if (fs.existsSync(fullPath)) {
+          await fs.promises.unlink(fullPath); // Asynchronously delete the file
+          console.log(`Deleted file: ${fullPath}`);
+        } else {
+          console.log(`File not found: ${fullPath}`);
+        }
+      } catch (err) {
+        console.error(`Error deleting file ${fullPath}:`, err);
+      }
+    });
+
+    // Wait for all file deletions to complete
+    await Promise.all(deletePromises);
+
+    // Delete the product document
+    await db.product.findByIdAndDelete(jsonBody.id);
+
+    return {
+      status: true,
+      message: "Product and associated images deleted successfully",
+    };
   } catch (error) {
-    return { status: false, message: error };
+    console.error("Error deleting product and images:", error);
+    return { status: false, message: "Error deleting product and images" };
   }
 };
 
@@ -106,7 +152,6 @@ const bagBooking = async (jsonBody) => {
 };
 
 const createOrder = async (jsonBody) => {
-  console.log(jsonBody);
   try {
     const orderData = {
       customerData: {

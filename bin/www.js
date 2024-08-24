@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 const app = require("../server");
 const debug = require("debug")("ix-internalsystem:server");
 const http = require("http");
@@ -6,18 +6,14 @@ const mongoose = require("mongoose");
 const express = require("express");
 // const mongoURI = 'mongodb://atlas-sql-665d3e6935a04b0cbd286826-ifvpi.a.query.mongodb.net/hotelmidasreegency?ssl=true&authSource=admin';
 
-
 // Connect to MongoDB
 const connectToDB = async () => {
   try {
-    await mongoose.connect(
-      process.env.MONGO_URL,
-      {
-        useUnifiedTopology: true,
-        autoIndex: true,
-        serverSelectionTimeoutMS: 30000,
-      }
-    );
+    await mongoose.connect(process.env.MONGO_URL, {
+      useUnifiedTopology: true,
+      autoIndex: true,
+      serverSelectionTimeoutMS: 30000,
+    });
     console.log("Connected correctly to MongoDB Atlas server");
   } catch (error) {
     console.error("Could not connect to MongoDB Atlas", error);
@@ -26,7 +22,7 @@ const connectToDB = async () => {
 };
 
 connectToDB();
-// Get Port from environment and store in Express
+
 
 var port = normalizePort(process.env.PORT);
 app.set("port", port);

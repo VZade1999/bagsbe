@@ -3,6 +3,7 @@ const router = express.Router();
 const userMngtController = require("../controller/userMngtController");
 const productController = require("../controller/productsController");
 const auth = require("../middleware/aut");
+const upload = require("../middleware/uploadMiddleware");
 
 router.post("/register", userMngtController.registerUser);
 
@@ -16,7 +17,11 @@ router.post("/createcategory", productController.createCategory);
 
 router.get("/categorylist", productController.categoryList);
 
-router.post("/createproduct", productController.createProduct);
+router.post(
+  "/createproduct",
+  upload.array("images"),
+  productController.createProduct
+);
 
 router.get("/productlist", productController.productList);
 
@@ -24,9 +29,13 @@ router.post("/deleteproduct", productController.deleteProduct);
 
 router.post("/bagbooking", auth.validateAuth, productController.bagBooking);
 
-router.post("/createorder",auth.validateAuth, productController.createOrder);
+router.post("/createorder", auth.validateAuth, productController.createOrder);
 
-router.post("/order/update-status",auth.validateAuth, productController.UpdateOrder);
+router.post(
+  "/order/update-status",
+  auth.validateAuth,
+  productController.UpdateOrder
+);
 
 router.get("/orderlist", productController.orderList);
 
