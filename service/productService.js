@@ -51,6 +51,8 @@ const createProduct = async (jsonBody) => {
       price: jsonBody.price,
       stock: jsonBody.stock,
       description: jsonBody.description,
+      weight: jsonBody.weight,
+      packingcharges: jsonBody.packingCharges,
       category: jsonBody.category,
       images: jsonBody.images || [],
       isActive: true,

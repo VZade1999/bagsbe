@@ -29,7 +29,7 @@ async function categoryList(req, res) {
 
 async function createProduct(req, res) {
   try {
-    const { name, price, stock, description, category } = req.body;
+    const { name, price, stock, description, weight, packingCharges, category } = req.body;
     const images = req.files;
     const imagePaths = images ? images.map((file) => file.path) : [];
     const createProductResponse = await productService.createProduct({
@@ -37,6 +37,8 @@ async function createProduct(req, res) {
       price,
       stock,
       description,
+      weight,
+      packingCharges,
       category,
       images: imagePaths,
     });

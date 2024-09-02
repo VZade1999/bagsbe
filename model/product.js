@@ -19,6 +19,14 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    weight: {
+      type: Number,
+      required: true,
+    },
+    packingcharges: {
+      type: Number,
+      required: true,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
