@@ -15,8 +15,11 @@ const orderSchema = new mongoose.Schema(
     cartItems: [
       {
         title: { type: String, required: true },
-        description: { type: String, required: true },
         price: { type: Number, required: true },
+        image: { type: String, required: true }, // New field for image path
+        description: { type: String, required: true },
+        color: { type: String, required: true }, // New field for color code
+        weight: { type: Number, required: true }, // New field for weight
         quantity: { type: Number, required: true },
         totalPrice: { type: Number, required: true },
       },

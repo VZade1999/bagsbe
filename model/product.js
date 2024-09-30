@@ -1,4 +1,3 @@
-// models/Product.js
 const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema(
@@ -7,17 +6,19 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
-    stock: {
-      type: Number,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
+    descriptions: {
+      shortDescription: {
+        type: String,
+        required: false,
+      },
+      longDescription: {
+        type: String,
+        required: false,
+      },
+      features: {
+        type: String,
+        required: false,
+      },
     },
     weight: {
       type: Number,
@@ -32,10 +33,25 @@ const ProductSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    colors: [
+      {
+        color: {
+          type: String, // This will store color code (e.g., '#cc0000')
+          required: true,
+        },
+        quantity: {
+          type: Number, // Quantity available for the specific color
+          required: true,
+        },
+        price: {
+          type: Number, // Price for the specific color variation
+          required: true,
+        },
+      },
+    ],
     images: [
       {
-        // Change from `image` to `images` to handle multiple files
-        type: String,
+        type: String, // Store image file paths
         required: false,
       },
     ],

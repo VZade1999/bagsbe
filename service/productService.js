@@ -48,16 +48,19 @@ const createProduct = async (jsonBody) => {
   try {
     const newProduct = new db.product({
       name: jsonBody.name,
-      price: jsonBody.price,
-      stock: jsonBody.stock,
-      description: jsonBody.description,
-      weight: jsonBody.weight,
-      packingcharges: jsonBody.packingCharges,
+      price: Number(jsonBody.price) || 0, // Default to 0 if undefined
+      descriptions: jsonBody.descriptions
+        ? JSON.parse(jsonBody.descriptions)
+        : {}, // Parse descriptions
+      weight: Number(jsonBody.weight),
+      packingcharges: Number(jsonBody.packingCharges),
       category: jsonBody.category,
       images: jsonBody.images || [],
+      colors: jsonBody.colors ? JSON.parse(jsonBody.colors) : [], // Parse colors array
       isActive: true,
       isDeleted: false,
     });
+
     try {
       const savedProduct = await newProduct.save();
       return { status: true, message: savedProduct };
@@ -84,7 +87,6 @@ const deleteProduct = async (jsonBody) => {
   try {
     // Find the product by ID
     const product = await db.product.findById(jsonBody.id);
-    console.log("Product details to be deleted:", product);
 
     if (!product) {
       return { status: false, message: "Product not found" };
@@ -154,6 +156,7 @@ const bagBooking = async (jsonBody) => {
 };
 
 const createOrder = async (jsonBody) => {
+  console.log("jsonBody", jsonBody);
   try {
     const orderData = {
       customerData: {
@@ -169,9 +172,12 @@ const createOrder = async (jsonBody) => {
       cartItems: jsonBody.cartItem.map((item) => ({
         title: item.title,
         price: item.price,
+        image: item.image01,
         description: item.desc,
+        color: item.color,
+        weight: item.weight,
         quantity: item.quantity,
-        totalPrice: item.totalPrice,
+        totalPrice: item.price * item.quantity,
       })),
       subtotal: jsonBody.subtotal,
       GST: jsonBody.GST,
@@ -183,35 +189,48 @@ const createOrder = async (jsonBody) => {
 
     const newOrder = new db.order(orderData);
 
+    // Process each cart item and update stock
     for (const item of jsonBody.cartItem) {
       const product = await db.product.findById(item.id);
 
-      if (product.stock >= item.quantity) {
-        product.stock -= item.quantity;
+      // Find the specific color variant in the product's colors array
+      const colorVariant = product.colors.find(
+        (colorItem) => colorItem.color === item.color
+      );
 
-        // Set product as out of stock if stock is zero
-        if (product.stock === 0) {
-          product.isActive = false;
-        }
-
-        await product.save();
-        const savedOrder = await newOrder.save();
-        return { status: true, message: savedOrder };
-      } else {
-        console.log(error);
-        return { status: false, message: `Not enough stock for ${item.title}` };
+      if (!colorVariant) {
+        return {
+          status: false,
+          message: `Color variant ${item.color} not available for ${item.title}`,
+        };
       }
-    }
-    try {
-      const savedOrder = await newOrder.save();
-    } catch (error) {
-      console.log(error);
-    }
 
+      // Check if the color variant has enough stock
+      if (colorVariant.quantity < item.quantity) {
+        return {
+          status: false,
+          message: `Not enough stock for ${item.title} in color ${item.color}`,
+        };
+      }
+
+      // Reduce the stock for the specific color
+      colorVariant.quantity -= item.quantity;
+
+      // If the stock for this color variant is zero, deactivate the product
+      if (colorVariant.quantity === 0) {
+        product.isActive = false;
+      }
+
+      // Save the updated product with reduced stock
+      await product.save();
+    }
+    // Save the order after all items are processed
+    const savedOrder = await newOrder.save();
+    console.log("order inserted into DB", savedOrder);
     return { status: true, message: savedOrder };
   } catch (error) {
-    console.log(error);
-    return { status: false, message: error };
+    console.error(error);
+    return { status: false, message: error.message };
   }
 };
 
@@ -253,7 +272,6 @@ const myOrderList = async (jsonBody) => {
     const orders = await db.order.find({
       "customerData.useremail": jsonBody.useremail,
     });
-    console.log(orders);
     return { status: true, message: orders };
   } catch (error) {
     console.log(error);
